@@ -2,21 +2,29 @@ import React, {FC, useEffect, useState} from 'react';
 import {Board} from "../modules/Board";
 import CellComponent from "./CellComponent";
 import {Cell} from "../modules/Cell";
+import {Player} from "../modules/Player";
 
 interface BoardProps {
     board: Board;
+    currentPlayer: Player | null;
+    swapPlayer: () => void;
     setBoard: (board: Board) => void;
+
 }
 
-const BoardComponent: FC<BoardProps> = ({board, setBoard}) => {
+const BoardComponent: FC<BoardProps> = ({board, setBoard, currentPlayer, swapPlayer}) => {
     const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
 
     function click(cell: Cell) {
         if(selectedCell && selectedCell !== cell && selectedCell.figure?.canMove(cell)) {
             selectedCell.moveFigure(cell)
+            swapPlayer();
             setSelectedCell(null)
         } else {
-            setSelectedCell(cell)
+            if(cell.figure?.color === currentPlayer?.color) {
+                setSelectedCell(cell)
+            }
+
         }
     }
 
@@ -36,16 +44,19 @@ const BoardComponent: FC<BoardProps> = ({board, setBoard}) => {
 
 
     return (
-        <div className='board'>
-            {board.cells.map((row, index) =>
-            <React.Fragment key={index} >
-                {row.map(cell =>
-                    <CellComponent cell={cell} key={cell.id} click={click}
-                                   selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y}/>
-                )}
-            </React.Fragment>
-                )}
-        </div>
+       <div>
+           <h3>Ход {currentPlayer?.color} игрока</h3>
+           <div className='board'>
+               {board.cells.map((row, index) =>
+                   <React.Fragment key={index} >
+                       {row.map(cell =>
+                           <CellComponent cell={cell} key={cell.id} click={click}
+                                          selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y}/>
+                       )}
+                   </React.Fragment>
+               )}
+           </div>
+       </div>
     );
 };
 
